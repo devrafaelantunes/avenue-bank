@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<title>Avenue — Digital Banking</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Avenue"/>
+<meta name="theme-color" content="#0b1f3a"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<style>
+:root{
+  --navy:#0b1f3a; --navy2:#0d2645; --navy3:#12315a;
+  --ink:#0a1626; --card:#ffffff; --bg:#f4f6fa;
+  --green:#12b981; --green2:#3ee6a8; --greenDk:#0e9c6e;
+  --gold:#c9a24b; --muted:#6b7a90; --line:#e6ebf2;
+  --red:#e0533d; --blue:#2f6bff;
+  --sh:0 8px 30px rgba(11,31,58,.10);
+  --sh2:0 2px 10px rgba(11,31,58,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Arial,sans-serif;
+  background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+.app{max-width:460px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+.hidden{display:none!important}
+::-webkit-scrollbar{width:0;height:0}
+
+/* ══════ SPLASH ══════ */
+#splash{
+  position:fixed;inset:0;z-index:1000;
+  background:radial-gradient(120% 100% at 50% 0%,#12315a 0%,#0b1f3a 55%,#081729 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  transition:opacity .6s ease;
+}
+.splash-mark{width:96px;height:96px;filter:drop-shadow(0 10px 30px rgba(18,185,129,.35));animation:pop .8s cubic-bezier(.2,.8,.2,1)}
+.splash-word{color:#fff;font-size:2rem;font-weight:700;letter-spacing:8px;opacity:0;animation:fadeUp .7s .35s forwards}
+.splash-sub{color:rgba(255,255,255,.5);font-size:.72rem;letter-spacing:3px;text-transform:uppercase;opacity:0;animation:fadeUp .7s .55s forwards}
+@keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════ LOGIN ══════ */
+#login{
+  position:fixed;inset:0;z-index:900;
+  background:radial-gradient(120% 90% at 50% -10%,#12315a 0%,#0b1f3a 55%,#081729 100%);
+  display:flex;flex-direction:column;color:#fff;padding:0 26px;
+}
+.login-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.login-mark{width:70px;height:70px;filter:drop-shadow(0 8px 24px rgba(18,185,129,.35))}
+.login-brand{font-size:1.7rem;font-weight:700;letter-spacing:6px}
+.login-tag{color:rgba(255,255,255,.5);font-size:.7rem;letter-spacing:3px;text-transform:uppercase}
+.login-form{padding-bottom:44px;display:flex;flex-direction:column;gap:14px}
+.login-hi{font-size:.9rem;color:rgba(255,255,255,.7);margin-bottom:6px}
+.fld{position:relative}
+.fld label{display:block;font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:6px;font-weight:600}
+.fld input{
+  width:100%;padding:15px 46px 15px 16px;border-radius:14px;font-size:1rem;color:#fff;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);outline:none;
+  transition:border .2s,background .2s;
+}
+.fld input:focus{border-color:var(--green);background:rgba(255,255,255,.11)}
+.fld input::placeholder{color:rgba(255,255,255,.3)}
+.eye{position:absolute;right:14px;top:38px;color:rgba(255,255,255,.5);font-size:1.05rem}
+.btn-primary{
+  width:100%;padding:16px;border-radius:14px;font-size:1rem;font-weight:700;color:#04241a;
+  background:linear-gradient(135deg,var(--green2),var(--green));box-shadow:0 8px 24px rgba(18,185,129,.35);
+  display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .12s,filter .2s;margin-top:6px;
+}
+.btn-primary:active{transform:scale(.98);filter:brightness(1.05)}
+.login-face{
+  display:flex;align-items:center;justify-content:center;gap:10px;color:rgba(255,255,255,.7);
+  font-size:.86rem;padding:12px;margin-top:2px;
+}
+.login-face svg{width:22px;height:22px}
+.login-hint{text-align:center;font-size:.72rem;color:rgba(255,255,255,.35);margin-top:2px;line-height:1.6}
+.login-hint b{color:rgba(255,255,255,.6)}
+.err-msg{color:#ff9b8c;font-size:.78rem;text-align:center;min-height:16px;transition:opacity .2s}
+
+/* ══════ APP SHELL ══════ */
+#main{display:none;min-height:100vh;padding-bottom:82px}
+.statusbar{height:env(safe-area-inset-top,0)}
+.topbar{
+  background:linear-gradient(160deg,#12315a,#0b1f3a);color:#fff;
+  padding:calc(env(safe-area-inset-top,0) + 16px) 20px 20px;
+  border-radius:0 0 26px 26px;position:relative;box-shadow:var(--sh);
+}
+.topbar-row{display:flex;align-items:center;justify-content:space-between}
+.greet{font-size:.78rem;color:rgba(255,255,255,.6)}
+.greet b{display:block;font-size:1.1rem;color:#fff;font-weight:700;margin-top:2px;letter-spacing:.3px}
+.avatar{
+  width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--green2),var(--green));
+  display:flex;align-items:center;justify-content:center;font-weight:700;color:#04241a;font-size:1rem;
+  border:2px solid rgba(255,255,255,.25);
+}
+.bell{position:relative;color:#fff;font-size:1.2rem;padding:6px}
+.bell::after{content:"";position:absolute;top:5px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--green2);border:2px solid var(--navy)}
+
+/* balance card */
+.bal-wrap{padding:0 20px;margin-top:-2px}
+.bal-card{
+  background:linear-gradient(135deg,#0f2b50 0%,#12315a 60%,#164178 100%);
+  border-radius:22px;padding:22px 22px 20px;color:#fff;position:relative;overflow:hidden;
+  box-shadow:0 14px 34px rgba(11,31,58,.28);margin-top:16px;
+}
+.bal-card::before{content:"";position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(62,230,168,.22),transparent 70%)}
+.bal-label{font-size:.72rem;color:rgba(255,255,255,.6);letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.bal-eye{color:rgba(255,255,255,.55);font-size:.85rem}
+.bal-main{font-size:2.35rem;font-weight:700;margin-top:8px;letter-spacing:.5px;display:flex;align-items:baseline;gap:6px}
+.bal-cur{font-size:1.05rem;font-weight:600;color:rgba(255,255,255,.75)}
+.bal-usd{margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bal-usd .usd-val{font-size:1rem;font-weight:600;color:var(--green2)}
+.fx-chip{
+  font-size:.66rem;color:rgba(255,255,255,.65);background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);padding:3px 9px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;
+}
+.fx-dot{width:6px;height:6px;border-radius:50%;background:var(--green2);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.bal-actions{display:flex;gap:10px;margin-top:18px}
+.bal-act{
+  flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:14px;
+  padding:11px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#fff;font-size:.68rem;font-weight:600;transition:background .18s,transform .12s;
+}
+.bal-act:active{transform:scale(.95);background:rgba(255,255,255,.18)}
+.bal-act .ico{font-size:1.15rem;line-height:1}
+
+/* quick tiles */
+.section{padding:22px 20px 0}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:1.02rem;font-weight:700;color:var(--ink)}
+.sec-link{font-size:.78rem;color:var(--green);font-weight:600}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tile{background:var(--card);border-radius:18px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:var(--sh2);transition:transform .12s}
+.tile:active{transform:scale(.94)}
+.tile .t-ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;background:#eef7f2;color:var(--greenDk)}
+.tile .t-ico.b{background:#eef2ff;color:var(--blue)}
+.tile .t-ico.g{background:#fbf5e6;color:var(--gold)}
+.tile .t-ico.r{background:#fdeeeb;color:var(--red)}
+.tile span{font-size:.68rem;color:var(--muted);font-weight:600;text-align:center;line-height:1.2}
+
+/* card visual */
+.vcard{
+  margin:0 20px;border-radius:22px;padding:22px;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(120deg,#0b1f3a 0%,#12315a 55%,#0e9c6e 160%);
+  box-shadow:0 12px 30px rgba(11,31,58,.25);aspect-ratio:1.6/1;display:flex;flex-direction:column;justify-content:space-between;
+}
+.vcard::after{content:"";position:absolute;bottom:-60px;left:-30px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(62,230,168,.18),transparent 70%)}
+.vc-top{display:flex;justify-content:space-between;align-items:flex-start}
+.vc-brand{font-weight:700;letter-spacing:4px;font-size:1rem}
+.vc-type{font-size:.62rem;letter-spacing:2px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-top:2px}
+.vc-chip{width:38px;height:28px;border-radius:6px;background:linear-gradient(135deg,#e8c976,#c9a24b);position:relative}
+.vc-chip::before{content:"";position:absolute;inset:5px;border:1px solid rgba(0,0,0,.15);border-radius:3px}
+.vc-num{font-size:1.15rem;letter-spacing:3px;font-family:"SF Mono",ui-monospace,monospace;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.vc-bot{display:flex;justify-content:space-between;align-items:flex-end}
+.vc-name{font-size:.82rem;letter-spacing:1px;text-transform:uppercase}
+.vc-exp{font-size:.62rem;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px}
+.vc-net{font-weight:700;font-style:italic;font-size:1.3rem;letter-spacing:-1px}
+
+/* transactions */
+.tx-list{background:var(--card);border-radius:20px;box-shadow:var(--sh2);overflow:hidden}
+.tx{display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.tx:last-child{border-bottom:none}
+.tx-ico{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+.tx-ico.in{background:#eaf9f2;color:var(--greenDk)}
+.tx-ico.out{background:#f2f5f9;color:#5b6b82}
+.tx-ico.inv{background:#eef2ff;color:var(--blue)}
+.tx-mid{flex:1;min-width:0}
+.tx-name{font-size:.92rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-sub{font-size:.72rem;color:var(--muted);margin-top:2px}
+.tx-amt{text-align:right;flex-shrink:0}
+.tx-amt .v{font-size:.92rem;font-weight:700}
+.tx-amt .v.pos{color:var(--greenDk)}
+.tx-amt .v.neg{color:var(--ink)}
+.tx-amt .u{font-size:.68rem;color:var(--muted);margin-top:2px}
+
+/* holdings */
+.hold{display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.hold:last-child{border-bottom:none}
+.hold-ico{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;color:#fff;flex-shrink:0}
+.hold-mid{flex:1}
+.hold-name{font-size:.9rem;font-weight:600}
+.hold-sub{font-size:.72rem;color:var(--muted);margin-top:2px}
+.hold-r{text-align:right}
+.hold-r .hv{font-size:.9rem;font-weight:700}
+.hold-r .hc{font-size:.72rem;margin-top:2px;font-weight:600}
+.up{color:var(--greenDk)}.down{color:var(--red)}
+
+/* profile */
+.prof-head{display:flex;flex-direction:column;align-items:center;gap:12px;padding:26px 20px 8px}
+.prof-av{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--green2),var(--green));display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#04241a;box-shadow:0 10px 26px rgba(18,185,129,.3);border:3px solid #fff}
+.prof-name{font-size:1.3rem;font-weight:700}
+.prof-mail{font-size:.82rem;color:var(--muted)}
+.prof-badge{display:inline-flex;align-items:center;gap:6px;background:#fbf5e6;color:var(--gold);font-size:.68rem;font-weight:700;padding:5px 12px;border-radius:20px;letter-spacing:.5px}
+.info-card{background:var(--card);border-radius:18px;box-shadow:var(--sh2);margin:0 20px;overflow:hidden}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.info-row:last-child{border-bottom:none}
+.info-k{font-size:.8rem;color:var(--muted)}
+.info-v{font-size:.86rem;font-weight:600;color:var(--ink)}
+.menu-card{background:var(--card);border-radius:18px;box-shadow:var(--sh2);margin:16px 20px 0;overflow:hidden}
+.menu-row{display:flex;align-items:center;gap:14px;padding:15px 16px;border-bottom:1px solid var(--line)}
+.menu-row:last-child{border-bottom:none}
+.menu-ico{width:36px;height:36px;border-radius:11px;background:#eef7f2;color:var(--greenDk);display:flex;align-items:center;justify-content:center;font-size:1rem}
+.menu-t{flex:1;font-size:.9rem;font-weight:600}
+.menu-ar{color:#c2ccda;font-size:1.1rem}
+
+/* page title */
+.page-title{padding:calc(env(safe-area-inset-top,0) + 20px) 20px 10px;font-size:1.5rem;font-weight:700;background:var(--bg)}
+.page-sub{padding:0 20px 6px;font-size:.82rem;color:var(--muted)}
+
+/* invest summary card */
+.inv-hero{margin:8px 20px 0;background:linear-gradient(135deg,#0f2b50,#12315a);border-radius:22px;padding:22px;color:#fff;box-shadow:var(--sh);position:relative;overflow:hidden}
+.inv-hero::before{content:"";position:absolute;top:-30px;right:-20px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(62,230,168,.2),transparent 70%)}
+.inv-lbl{font-size:.72rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.inv-val{font-size:2rem;font-weight:700;margin-top:6px}
+.inv-chg{margin-top:6px;font-size:.85rem;color:var(--green2);font-weight:600}
+
+/* nav */
+.nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-top:1px solid var(--line);display:flex;justify-content:space-around;
+  padding:8px 0 calc(env(safe-area-inset-bottom,0) + 8px);z-index:400;
+}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:#9aa8bc;font-size:.62rem;font-weight:600;padding:4px 12px;transition:color .2s;flex:1}
+.nav-item svg{width:23px;height:23px;stroke-width:2}
+.nav-item.active{color:var(--green)}
+.nav-fab{margin-top:-2px}
+.nav-fab .fab-btn{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--green2),var(--green));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(18,185,129,.4);margin-top:-18px;color:#04241a}
+.nav-fab .fab-btn svg{width:26px;height:26px}
+
+/* pages */
+.page{display:none}
+.page.active{display:block;animation:pgIn .3s ease}
+@keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════ FACE ID MODAL ══════ */
+#faceid{position:fixed;inset:0;z-index:800;background:rgba(6,14,26,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:none;align-items:flex-end}
+#faceid.show{display:flex;animation:fadeIn .25s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.face-sheet{background:linear-gradient(180deg,#0f2947,#0b1f3a);width:100%;max-width:460px;margin:0 auto;border-radius:28px 28px 0 0;padding:30px 26px calc(env(safe-area-inset-bottom,0) + 30px);text-align:center;color:#fff;animation:sheetUp .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.face-title{font-size:1.15rem;font-weight:700}
+.face-desc{font-size:.82rem;color:rgba(255,255,255,.6);margin-top:6px;min-height:20px}
+.face-ring{width:120px;height:120px;margin:24px auto 8px;position:relative}
+.face-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.face-ring .track{fill:none;stroke:rgba(255,255,255,.12);stroke-width:5}
+.face-ring .prog{fill:none;stroke:url(#fg);stroke-width:5;stroke-linecap:round;stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset .05s linear}
+.face-glyph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.face-glyph svg{width:58px;height:58px;transform:none}
+.face-glyph.scanning{animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.face-check{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.4);transition:all .35s cubic-bezier(.2,.8,.2,1)}
+.face-check.show{opacity:1;transform:scale(1)}
+.face-check svg{width:64px;height:64px}
+.face-cancel{margin-top:14px;color:rgba(255,255,255,.55);font-size:.88rem;padding:8px}
+
+/* toast */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:#0b1f3a;color:#fff;padding:12px 20px;border-radius:14px;font-size:.85rem;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:all .3s;z-index:950;display:flex;align-items:center;gap:9px}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast .tk{color:var(--green2)}
+
+/* generic modal (statement etc) */
+.sheet-mask{position:fixed;inset:0;z-index:700;background:rgba(6,14,26,.6);backdrop-filter:blur(6px);display:none;align-items:flex-end}
+.sheet-mask.show{display:flex;animation:fadeIn .25s}
+.sheet-body{background:#fff;width:100%;max-width:460px;margin:0 auto;border-radius:26px 26px 0 0;padding:8px 0 calc(env(safe-area-inset-bottom,0) + 20px);max-height:86vh;overflow-y:auto;animation:sheetUp .35s cubic-bezier(.2,.8,.2,1)}
+.sheet-grab{width:40px;height:5px;border-radius:5px;background:#dbe2ec;margin:8px auto 6px}
+.sheet-h{padding:8px 22px 14px;font-size:1.15rem;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.sheet-x{color:var(--muted);font-size:1.3rem;padding:4px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ══════ SPLASH ══════ -->
+  <div id="splash">
+    <img src="icon.svg" class="splash-mark" alt="Avenue"/>
+    <div class="splash-word">AVENUE</div>
+    <div class="splash-sub">Invest • Save • Grow</div>
+  </div>
+
+  <!-- ══════ LOGIN ══════ -->
+  <div id="login" class="hidden">
+    <div class="login-top">
+      <img src="icon.svg" class="login-mark" alt="Avenue"/>
+      <div class="login-brand">AVENUE</div>
+      <div class="login-tag">Global Investment Banking</div>
+    </div>
+    <div class="login-form">
+      <div class="login-hi">Welcome back. Sign in to continue.</div>
+      <div class="fld">
+        <label>Username</label>
+        <input id="user" type="text" autocomplete="username" placeholder="Enter your username" value=""/>
+      </div>
+      <div class="fld">
+        <label>Password</label>
+        <input id="pass" type="password" autocomplete="current-password" placeholder="Enter your password"/>
+        <span class="eye" onclick="togglePass()">👁</span>
+      </div>
+      <div class="err-msg" id="loginErr"></div>
+      <button class="btn-primary" onclick="doLogin()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#04241a" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Sign In
+      </button>
+      <button class="login-face" onclick="loginFace()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2" stroke-linecap="round"/><path d="M9 10v1M15 10v1M9.5 15c.8.7 4.2.7 5 0" stroke-linecap="round"/></svg>
+        Sign in with Face ID
+      </button>
+      <div class="login-hint">Demo access — user <b>AMPC</b>, any password.</div>
+    </div>
+  </div>
+
+  <!-- ══════ MAIN ══════ -->
+  <div id="main">
+
+    <!-- ───── HOME ───── -->
+    <div class="page active" id="page-home">
+      <div class="topbar">
+        <div class="topbar-row">
+          <div>
+            <span class="greet">Good afternoon,<b>Rafael Antunes</b></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="bell">🔔</button>
+            <div class="avatar" onclick="go('profile')">RA</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bal-wrap">
+        <div class="bal-card">
+          <div class="bal-label">Available Balance <span class="bal-eye" onclick="toggleBal()" id="balEye">👁</span></div>
+          <div class="bal-main"><span id="balBRL">R$ 10,000.00</span></div>
+          <div class="bal-usd">
+            <span class="usd-val" id="balUSD">≈ US$ 1,958.10</span>
+            <span class="fx-chip"><span class="fx-dot"></span>USD/BRL <b id="fxRate">5.1070</b></span>
+          </div>
+          <div class="bal-actions">
+            <button class="bal-act" onclick="requireFace('Add Money', ()=>toast('Deposit ready'))"><span class="ico">＋</span>Add</button>
+            <button class="bal-act" onclick="go('transfer')"><span class="ico">↑</span>Send</button>
+            <button class="bal-act" onclick="requireFace('Request Payment', ()=>toast('Request created'))"><span class="ico">↓</span>Request</button>
+            <button class="bal-act" onclick="go('invest')"><span class="ico">📈</span>Invest</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-head"><span class="sec-title">Quick Actions</span></div>
+        <div class="tiles">
+          <button class="tile" onclick="requireFace('Wire Transfer', ()=>go('transfer'))"><div class="t-ico">🏦</div><span>Wire</span></button>
+          <button class="tile" onclick="requireFace('Pay Bills', ()=>toast('Bills'))"><div class="t-ico b">🧾</div><span>Pay Bills</span></button>
+          <button class="tile" onclick="requireFace('Exchange', ()=>toast('FX Exchange'))"><div class="t-ico g">💱</div><span>Exchange</span></button>
+          <button class="tile" onclick="go('cards')"><div class="t-ico r">💳</div><span>Cards</span></button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-head"><span class="sec-title">My Card</span><span class="sec-link" onclick="go('cards')">Manage</span></div>
+      </div>
+      <div class="vcard">
+        <div class="vc-top">
+          <div><div class="vc-brand">AVENUE</div><div class="vc-type">Platinum Debit</div></div>
+          <div class="vc-chip"></div>
+        </div>
+        <div class="vc-num">4021 •••• •••• 8834</div>
+        <div class="vc-bot">
+          <div><div class="vc-name">Rafael Antunes</div><div class="vc-exp">Exp 08/30</div></div>
+          <div class="vc-net">VISA</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="sec-head"><span class="sec-title">Recent Activity</span><span class="sec-link" onclick="go('activity')">See all</span></div>
+        <div class="tx-list" id="homeTx"></div>
+      </div>
+
+      <div style="height:12px"></div>
+    </div>
+
+    <!-- ───── ACTIVITY ───── -->
+    <div class="page" id="page-activity">
+      <div class="page-title">Transactions</div>
+      <div class="page-sub">All account movements</div>
+      <div class="section" style="padding-top:12px">
+        <div class="tx-list" id="allTx"></div>
+      </div>
+      <div style="height:12px"></div>
+    </div>
+
+    <!-- ───── INVEST ───── -->
+    <div class="page" id="page-invest">
+      <div class="page-title">Invest</div>
+      <div class="inv-hero">
+        <div class="inv-lbl">Portfolio Value</div>
+        <div class="inv-val" id="portVal">US$ 0.00</div>
+        <div class="inv-chg">▲ +US$ 0.00 (0.00%) today</div>
+      </div>
+      <div class="section">
+        <div class="sec-head"><span class="sec-title">Holdings</span><span class="sec-link">Trade</span></div>
+        <div class="tx-list" id="holdings"></div>
+      </div>
+      <div class="section">
+        <div class="sec-head"><span class="sec-title">Watchlist</span></div>
+        <div class="tx-list" id="watch"></div>
+      </div>
+      <div style="height:12px"></div>
+    </div>
+
+    <!-- ───── CARDS ───── -->
+    <div class="page" id="page-cards">
+      <div class="page-title">Cards</div>
+      <div style="height:8px"></div>
+      <div class="vcard" style="margin-top:8px">
+        <div class="vc-top">
+          <div><div class="vc-brand">AVENUE</div><div class="vc-type">Platinum Debit</div></div>
+          <div class="vc-chip"></div>
+        </div>
+        <div class="vc-num">4021 •••• •••• 8834</div>
+        <div class="vc-bot">
+          <div><div class="vc-name">Rafael Antunes</div><div class="vc-exp">Exp 08/30</div></div>
+          <div class="vc-net">VISA</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="tiles">
+          <button class="tile" onclick="requireFace('Freeze Card', ()=>toast('Card frozen'))"><div class="t-ico b">❄️</div><span>Freeze</span></button>
+          <button class="tile" onclick="requireFace('Reveal Details', ()=>toast('Details shown'))"><div class="t-ico">👁</div><span>Details</span></button>
+          <button class="tile" onclick="requireFace('Set PIN', ()=>toast('PIN updated'))"><div class="t-ico g">🔑</div><span>PIN</span></button>
+          <button class="tile" onclick="requireFace('Card Limits', ()=>toast('Limits'))"><div class="t-ico r">⚙️</div><span>Limits</span></button>
+        </div>
+      </div>
+      <div class="section">
+        <div class="sec-head"><span class="sec-title">Card Details</span></div>
+        <div class="info-card">
+          <div class="info-row"><span class="info-k">Card Type</span><span class="info-v">Visa Platinum Debit</span></div>
+          <div class="info-row"><span class="info-k">Status</span><span class="info-v" style="color:var(--greenDk)">● Active</span></div>
+          <div class="info-row"><span class="info-k">Monthly Limit</span><span class="info-v">US$ 25,000.00</span></div>
+          <div class="info-row"><span class="info-k">Contactless</span><span class="info-v">Enabled</span></div>
+        </div>
+      </div>
+      <div style="height:12px"></div>
+    </div>
+
+    <!-- ───── TRANSFER ───── -->
+    <div class="page" id="page-transfer">
+      <div class="page-title">Send Money</div>
+      <div class="page-sub">Transfer to another account</div>
+      <div class="section" style="padding-top:14px">
+        <div class="info-card" style="margin:0;padding:18px 16px">
+          <div class="fld" style="margin-bottom:16px">
+            <label style="color:var(--muted)">Recipient</label>
+            <input style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);width:100%;padding:13px;border-radius:12px;margin-top:6px" placeholder="Name, @tag or account"/>
+          </div>
+          <div class="fld" style="margin-bottom:16px">
+            <label style="color:var(--muted)">Amount (US$)</label>
+            <input type="text" inputmode="decimal" style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);width:100%;padding:13px;border-radius:12px;margin-top:6px;font-size:1.2rem;font-weight:700" placeholder="0.00"/>
+          </div>
+          <div class="fld">
+            <label style="color:var(--muted)">Note (optional)</label>
+            <input style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);width:100%;padding:13px;border-radius:12px;margin-top:6px" placeholder="What's it for?"/>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <button class="btn-primary" style="color:#04241a" onclick="requireFace('Confirm Transfer', ()=>toast('Transfer sent'))">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#04241a" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Continue
+        </button>
+      </div>
+    </div>
+
+    <!-- ───── PROFILE ───── -->
+    <div class="page" id="page-profile">
+      <div class="prof-head">
+        <div class="prof-av">RA</div>
+        <div class="prof-name">Rafael Antunes</div>
+        <div class="prof-mail">rafael.antunes@avenue.com</div>
+        <div class="prof-badge">★ PLATINUM MEMBER</div>
+      </div>
+      <div style="height:14px"></div>
+      <div class="info-card">
+        <div class="info-row"><span class="info-k">Account Holder</span><span class="info-v">Rafael Antunes</span></div>
+        <div class="info-row"><span class="info-k">Username</span><span class="info-v">AMPC</span></div>
+        <div class="info-row"><span class="info-k">Account Number</span><span class="info-v">•••• •••• 8834</span></div>
+        <div class="info-row"><span class="info-k">Account Type</span><span class="info-v">Global Investment</span></div>
+        <div class="info-row"><span class="info-k">Country</span><span class="info-v">United States 🇺🇸</span></div>
+        <div class="info-row"><span class="info-k">Member Since</span><span class="info-v">Aug 2026</span></div>
+        <div class="info-row"><span class="info-k">Status</span><span class="info-v" style="color:var(--greenDk)">● Verified</span></div>
+      </div>
+      <div class="menu-card">
+        <div class="menu-row" onclick="requireFace('Security Settings', ()=>toast('Security'))"><div class="menu-ico">🔒</div><div class="menu-t">Security & Face ID</div><div class="menu-ar">›</div></div>
+        <div class="menu-row" onclick="toast('Statements')"><div class="menu-ico">📄</div><div class="menu-t">Statements & Documents</div><div class="menu-ar">›</div></div>
+        <div class="menu-row" onclick="toast('Notifications')"><div class="menu-ico">🔔</div><div class="menu-t">Notifications</div><div class="menu-ar">›</div></div>
+        <div class="menu-row" onclick="toast('Support')"><div class="menu-ico">💬</div><div class="menu-t">Help & Support</div><div class="menu-ar">›</div></div>
+      </div>
+      <div class="menu-card" style="margin-top:16px">
+        <div class="menu-row" onclick="logout()"><div class="menu-ico" style="background:#fdeeeb;color:var(--red)">⎋</div><div class="menu-t" style="color:var(--red)">Sign Out</div><div class="menu-ar">›</div></div>
+      </div>
+      <div style="text-align:center;color:#b6c0cf;font-size:.72rem;padding:20px">Avenue Financial Inc. · Member FDIC<br/>App v1.0.0</div>
+    </div>
+
+  </div>
+
+  <!-- ══════ BOTTOM NAV ══════ -->
+  <div class="nav" id="nav">
+    <button class="nav-item active" data-p="home" onclick="go('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" stroke-linejoin="round"/></svg>
+      Home
+    </button>
+    <button class="nav-item" data-p="activity" onclick="go('activity')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19V5M4 19h16M8 15l3-4 3 3 4-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Activity
+    </button>
+    <button class="nav-fab" onclick="go('transfer')">
+      <div class="fab-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></div>
+    </button>
+    <button class="nav-item" data-p="invest" onclick="go('invest')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg>
+      Invest
+    </button>
+    <button class="nav-item" data-p="profile" onclick="go('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6" stroke-linecap="round"/></svg>
+      Profile
+    </button>
+  </div>
+
+  <!-- ══════ FACE ID ══════ -->
+  <div id="faceid">
+    <div class="face-sheet">
+      <div class="face-title" id="faceTitle">Confirm with Face ID</div>
+      <div class="face-desc" id="faceDesc">Look at your device to authenticate</div>
+      <div class="face-ring">
+        <svg viewBox="0 0 120 120">
+          <defs><linearGradient id="fg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ee6a8"/><stop offset="1" stop-color="#12b981"/></linearGradient></defs>
+          <circle class="track" cx="60" cy="60" r="54"/>
+          <circle class="prog" id="faceProg" cx="60" cy="60" r="54"/>
+        </svg>
+        <div class="face-glyph scanning" id="faceGlyph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3ee6a8" stroke-width="1.6"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2" stroke-linecap="round"/><path d="M9 10v1.5M15 10v1.5M9 15c1 1 5 1 6 0" stroke-linecap="round"/></svg>
+        </div>
+        <div class="face-check" id="faceCheck">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#3ee6a8" stroke-width="2.6"><circle cx="12" cy="12" r="10" stroke="rgba(62,230,168,.25)"/><path d="M7 12.5l3.2 3.2L17 9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <button class="face-cancel" onclick="cancelFace()">Cancel</button>
+    </div>
+  </div>
+
+  <div id="toast"><span class="tk">✓</span><span id="toastMsg">Done</span></div>
+
+</div>
+
+<script>
+/* ══════ DATA ══════ */
+let FX = 5.1070;        // USD -> BRL (fallback = today's rate)
+let fxDate = "Aug 09, 2026";
+const BAL_BRL = 10000;  // R$ 10,000.00 base balance
+
+const transactions = [
+  {name:"Incoming Wire Transfer", sub:"Account funding · Aug 9", amt:10000, cur:"BRL", type:"in", ico:"↓"},
+  {name:"Apple Store", sub:"Purchase · Aug 8", amt:-129.00, cur:"USD", type:"out", ico:"🍎"},
+  {name:"Dividend — VOO", sub:"Investment income · Aug 7", amt:42.18, cur:"USD", type:"inv", ico:"📈"},
+  {name:"Starbucks", sub:"Purchase · Aug 7", amt:-6.75, cur:"USD", type:"out", ico:"☕"},
+  {name:"Uber", sub:"Transport · Aug 6", amt:-18.40, cur:"USD", type:"out", ico:"🚗"},
+  {name:"Buy — AAPL x2", sub:"Trade executed · Aug 5", amt:-458.60, cur:"USD", type:"inv", ico:"📉"},
+  {name:"Amazon", sub:"Purchase · Aug 4", amt:-73.99, cur:"USD", type:"out", ico:"📦"},
+  {name:"Interest Earned", sub:"Savings · Aug 1", amt:15.32, cur:"USD", type:"in", ico:"💰"},
+];
+
+const holdings = [
+  {sym:"AAPL", name:"Apple Inc.", qty:"2 shares", val:462.30, chg:+1.24, color:"#111"},
+  {sym:"VOO", name:"Vanguard S&P 500", qty:"1 share", val:512.80, chg:+0.86, color:"#8b1a1a"},
+  {sym:"MSFT", name:"Microsoft Corp.", qty:"1 share", val:428.15, chg:-0.42, color:"#0a7"},
+  {sym:"TSLA", name:"Tesla Inc.", qty:"3 shares", val:735.90, chg:+2.31, color:"#c0392b"},
+];
+const watch = [
+  {sym:"NVDA", name:"NVIDIA Corp.", qty:"Watching", val:128.44, chg:+3.12, color:"#237a3a"},
+  {sym:"AMZN", name:"Amazon.com", qty:"Watching", val:184.20, chg:-1.05, color:"#e07b00"},
+  {sym:"GOOGL", name:"Alphabet Inc.", qty:"Watching", val:172.90, chg:+0.64, color:"#2f6bff"},
+];
+
+let balHidden = false;
+
+/* ══════ FORMAT ══════ */
+const fmtBRL = n => "R$ " + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtUSD = n => "US$ " + Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+
+function renderBalance(){
+  const usd = BAL_BRL / FX;
+  if(balHidden){
+    document.getElementById('balBRL').textContent = "R$ ••••••";
+    document.getElementById('balUSD').textContent = "≈ US$ ••••";
+  } else {
+    document.getElementById('balBRL').textContent = fmtBRL(BAL_BRL);
+    document.getElementById('balUSD').textContent = "≈ " + fmtUSD(usd);
+  }
+  document.getElementById('fxRate').textContent = FX.toFixed(4);
+}
+function toggleBal(){ balHidden=!balHidden; document.getElementById('balEye').textContent = balHidden?"🚫":"👁"; renderBalance(); }
+
+function txRow(t){
+  const isBRL = t.cur==="BRL";
+  const amtStr = (t.amt>0?"+":"−") + (isBRL?fmtBRL(Math.abs(t.amt)):fmtUSD(Math.abs(t.amt)));
+  const sub = isBRL ? "≈ " + fmtUSD(Math.abs(t.amt)/FX) : "≈ " + fmtBRL(Math.abs(t.amt)*FX);
+  const cls = t.type==="in"?"in":(t.type==="inv"?"inv":"out");
+  const pos = t.amt>0?"pos":"neg";
+  return `<div class="tx">
+    <div class="tx-ico ${cls}">${t.ico}</div>
+    <div class="tx-mid"><div class="tx-name">${t.name}</div><div class="tx-sub">${t.sub}</div></div>
+    <div class="tx-amt"><div class="v ${pos}">${amtStr}</div><div class="u">${sub}</div></div>
+  </div>`;
+}
+function holdRow(h){
+  const up = h.chg>=0;
+  return `<div class="hold">
+    <div class="hold-ico" style="background:${h.color}">${h.sym}</div>
+    <div class="hold-mid"><div class="hold-name">${h.name}</div><div class="hold-sub">${h.qty}</div></div>
+    <div class="hold-r"><div class="hv">${fmtUSD(h.val)}</div><div class="hc ${up?'up':'down'}">${up?'▲':'▼'} ${Math.abs(h.chg)}%</div></div>
+  </div>`;
+}
+
+function renderAll(){
+  renderBalance();
+  document.getElementById('homeTx').innerHTML = transactions.slice(0,4).map(txRow).join('');
+  document.getElementById('allTx').innerHTML = transactions.map(txRow).join('');
+  document.getElementById('holdings').innerHTML = holdings.map(holdRow).join('');
+  document.getElementById('watch').innerHTML = watch.map(holdRow).join('');
+  const port = holdings.reduce((s,h)=>s+h.val,0);
+  document.getElementById('portVal').textContent = fmtUSD(port);
+  document.querySelector('#page-invest .inv-chg').innerHTML = "▲ +US$ 34.72 (1.58%) today";
+}
+
+/* ══════ NAV ══════ */
+function go(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.p===p));
+  window.scrollTo(0,0);
+}
+
+/* ══════ LOGIN ══════ */
+function togglePass(){ const p=document.getElementById('pass'); p.type = p.type==="password"?"text":"password"; }
+function doLogin(){
+  const u = document.getElementById('user').value.trim().toUpperCase();
+  const p = document.getElementById('pass').value;
+  const err = document.getElementById('loginErr');
+  if(u!=="AMPC"){ err.textContent="Unknown user. Use AMPC."; return; }
+  if(!p){ err.textContent="Please enter a password."; return; }
+  err.textContent="";
+  requireFace("Sign In", enterApp, "Authenticate to access your account");
+}
+function loginFace(){
+  document.getElementById('user').value = "AMPC";
+  requireFace("Sign In", enterApp, "Authenticate to access your account");
+}
+function enterApp(){
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('main').style.display='block';
+  document.getElementById('nav').style.display='flex';
+  go('home');
+}
+function logout(){
+  document.getElementById('main').style.display='none';
+  document.getElementById('nav').style.display='none';
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('pass').value="";
+  go('home');
+}
+
+/* ══════ FACE ID ENGINE ══════ */
+let faceCb=null, faceTimer=null;
+function requireFace(title, cb, desc){
+  faceCb = cb;
+  document.getElementById('faceTitle').textContent = title;
+  document.getElementById('faceDesc').textContent = desc || "Look at your device to authenticate";
+  const prog = document.getElementById('faceProg');
+  const glyph = document.getElementById('faceGlyph');
+  const check = document.getElementById('faceCheck');
+  prog.style.transition='none'; prog.style.strokeDashoffset='339';
+  glyph.classList.add('scanning'); glyph.style.opacity='1';
+  check.classList.remove('show');
+  document.getElementById('faceid').classList.add('show');
+  // animate ring
+  let pct=0;
+  clearInterval(faceTimer);
+  setTimeout(()=>{ prog.style.transition='stroke-dashoffset .05s linear'; },30);
+  faceTimer = setInterval(()=>{
+    pct += 3.2;
+    if(pct>=100){ pct=100; clearInterval(faceTimer); faceSuccess(); }
+    prog.style.strokeDashoffset = 339 - (339*pct/100);
+  },28);
+}
+function faceSuccess(){
+  const glyph=document.getElementById('faceGlyph');
+  const check=document.getElementById('faceCheck');
+  const desc=document.getElementById('faceDesc');
+  glyph.classList.remove('scanning'); glyph.style.opacity='0';
+  check.classList.add('show');
+  desc.textContent="Identity verified ✓";
+  if(navigator.vibrate) navigator.vibrate(30);
+  setTimeout(()=>{
+    document.getElementById('faceid').classList.remove('show');
+    const cb=faceCb; faceCb=null;
+    if(cb) cb();
+  },620);
+}
+function cancelFace(){
+  clearInterval(faceTimer);
+  document.getElementById('faceid').classList.remove('show');
+  faceCb=null;
+}
+
+/* ══════ TOAST ══════ */
+let toastT=null;
+function toast(msg){
+  document.getElementById('toastMsg').textContent=msg;
+  const t=document.getElementById('toast'); t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+/* ══════ LIVE FX ══════ */
+async function loadFX(){
+  try{
+    const r = await fetch("https://open.er-api.com/v6/latest/USD");
+    const d = await r.json();
+    if(d && d.rates && d.rates.BRL){ FX = d.rates.BRL; renderAll(); }
+  }catch(e){ /* keep fallback rate */ }
+}
+
+/* ══════ BOOT ══════ */
+window.addEventListener('load', ()=>{
+  renderAll();
+  loadFX();
+  setTimeout(()=>{
+    const sp=document.getElementById('splash');
+    sp.style.opacity='0';
+    setTimeout(()=>{ sp.style.display='none'; document.getElementById('login').classList.remove('hidden'); },600);
+  },2100);
+});
+</script>
+</body>
+</html>
