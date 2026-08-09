@@ -250,6 +250,28 @@ svg{display:block}
 .face-check svg{width:70px;height:70px}
 .face-cancel{margin-top:16px;color:rgba(255,255,255,.5);font-size:.88rem;padding:8px}
 
+/* ══════ VERIFYING IDENTITY ══════ */
+#verify{position:fixed;inset:0;z-index:850;background:radial-gradient(120% 90% at 50% -10%,#12315a 0%,#0a1a30 60%,#06101f 100%);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+#verify.show{display:flex;animation:fadeIn .3s}
+.vf-inner{display:flex;flex-direction:column;align-items:center;gap:0;padding:0 30px;text-align:center}
+.vf-logo img{width:52px;height:52px;opacity:.9;margin-bottom:30px;animation:vfBreath 2.4s ease-in-out infinite}
+@keyframes vfBreath{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
+.vf-spinner{width:92px;height:92px;position:relative;margin-bottom:26px}
+.vf-spinner svg{width:100%;height:100%;transform:rotate(-90deg)}
+.vf-track{fill:none;stroke:rgba(255,255,255,.1);stroke-width:3}
+.vf-arc{fill:none;stroke:url(#fg);stroke-width:3;stroke-linecap:round;stroke-dasharray:132;stroke-dashoffset:99;transform-origin:center;animation:vfSpin 1s linear infinite}
+@keyframes vfSpin{to{transform:rotate(360deg)}}
+.vf-shield{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.vf-shield svg{width:34px;height:34px;transform:none;animation:facePulse 1.6s ease-in-out infinite}
+.vf-title{font-size:1.2rem;font-weight:600;letter-spacing:.3px}
+.vf-step{font-size:.84rem;color:rgba(255,255,255,.55);margin-top:10px;min-height:20px;transition:opacity .3s}
+.vf-dots{display:flex;gap:7px;margin-top:18px}
+.vf-dots span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.3);animation:vfDot 1.4s ease-in-out infinite}
+.vf-dots span:nth-child(2){animation-delay:.2s}
+.vf-dots span:nth-child(3){animation-delay:.4s}
+@keyframes vfDot{0%,100%{background:rgba(255,255,255,.25);transform:scale(1)}40%{background:var(--acc2);transform:scale(1.35)}}
+.vf-foot{display:flex;align-items:center;gap:6px;font-size:.68rem;color:rgba(255,255,255,.4);margin-top:44px;letter-spacing:.3px}
+
 /* toast */
 #toast{position:fixed;bottom:104px;left:50%;transform:translateX(-50%) translateY(20px);background:#0a1a30;color:#fff;padding:12px 18px;border-radius:14px;font-size:.85rem;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:all .3s;z-index:950;display:flex;align-items:center;gap:9px}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -535,6 +557,21 @@ svg{display:block}
     <button class="nav-item" data-p="profile" onclick="go('profile')"><svg viewBox="0 0 24 24"><use href="#i-user"/></svg>Profile</button>
   </div>
 
+  <!-- VERIFYING IDENTITY -->
+  <div id="verify">
+    <div class="vf-inner">
+      <div class="vf-logo"><img src="icon.svg" alt="Avenue"/></div>
+      <div class="vf-spinner">
+        <svg viewBox="0 0 50 50"><circle class="vf-track" cx="25" cy="25" r="21"/><circle class="vf-arc" cx="25" cy="25" r="21"/></svg>
+        <div class="vf-shield"><svg viewBox="0 0 24 24" style="stroke:#22b587;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#i-shield"/></svg></div>
+      </div>
+      <div class="vf-title">Verifying identity</div>
+      <div class="vf-step" id="vfStep">Establishing secure connection…</div>
+      <div class="vf-dots"><span></span><span></span><span></span></div>
+      <div class="vf-foot"><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:rgba(255,255,255,.4);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#i-shield"/></svg>256-bit encrypted · Avenue Secure</div>
+    </div>
+  </div>
+
   <!-- FACE ID -->
   <div id="faceid">
     <div class="face-sheet">
@@ -678,10 +715,34 @@ function loginFace(){
   requireFace("Sign In", enterApp, "Authenticate to access your account");
 }
 function enterApp(){
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('main').style.display='block';
-  document.getElementById('nav').style.display='flex';
-  go('home');
+  // show "Verifying identity" screen (~5s) then land on home
+  const v = document.getElementById('verify');
+  const step = document.getElementById('vfStep');
+  v.classList.add('show');
+  const steps = [
+    "Establishing secure connection…",
+    "Confirming account credentials…",
+    "Running security checks…",
+    "Loading your accounts…",
+    "Almost there…"
+  ];
+  let i = 0;
+  step.textContent = steps[0];
+  const stepTimer = setInterval(()=>{
+    i++;
+    if(i < steps.length){
+      step.style.opacity = 0;
+      setTimeout(()=>{ step.textContent = steps[i]; step.style.opacity = 1; }, 200);
+    }
+  }, 1000);
+  setTimeout(()=>{
+    clearInterval(stepTimer);
+    v.classList.remove('show');
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('main').style.display='block';
+    document.getElementById('nav').style.display='flex';
+    go('home');
+  }, 5200);
 }
 function logout(){
   document.getElementById('main').style.display='none';
