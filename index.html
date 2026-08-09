@@ -77,10 +77,9 @@ svg{display:block}
 
 /* ══════ APP SHELL ══════ */
 #main{display:none;min-height:100vh;padding-bottom:84px}
-.topbar{background:linear-gradient(165deg,#12315a,#0a1a30);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 52px) 20px 22px;border-radius:0 0 28px 28px;position:relative;box-shadow:var(--sh)}
+.topbar{background:linear-gradient(165deg,#12315a,#0a1a30);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 22px) 20px 22px;border-radius:0 0 28px 28px;position:relative;box-shadow:var(--sh)}
 .topbar-row{display:flex;align-items:center;justify-content:space-between}
-.brand-row{display:flex;align-items:center;margin-bottom:16px}
-.brand-acct{font-size:.72rem;font-weight:600;letter-spacing:2.5px;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.18);padding:4px 12px;border-radius:20px}
+.brand-acct{display:block;font-size:.66rem;font-weight:600;letter-spacing:2px;color:rgba(255,255,255,.42);margin-top:5px}
 .greet{font-size:.76rem;color:rgba(255,255,255,.55)}
 .greet b{display:block;font-size:1.1rem;color:#fff;font-weight:600;margin-top:3px;letter-spacing:.2px}
 .avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--acc2),var(--acc));display:flex;align-items:center;justify-content:center;font-weight:600;color:#04241a;font-size:.95rem;border:2px solid rgba(255,255,255,.2)}
@@ -367,11 +366,8 @@ svg{display:block}
     <!-- HOME -->
     <div class="page active" id="page-home">
       <div class="topbar">
-        <div class="brand-row">
-          <span class="brand-acct">AMPZ</span>
-        </div>
         <div class="topbar-row">
-          <div><span class="greet">Good afternoon,<b>Rafael Antunes</b></span></div>
+          <div><span class="greet">Good afternoon,<b>Rafael Antunes</b><span class="brand-acct">AMPZ</span></span></div>
           <div style="display:flex;align-items:center;gap:8px">
             <button class="bell"><svg viewBox="0 0 24 24"><use href="#i-bell"/></svg></button>
             <div class="avatar" onclick="go('profile')">RA</div>
