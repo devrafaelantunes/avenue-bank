@@ -254,8 +254,9 @@ svg{display:block}
 #verify{position:fixed;inset:0;z-index:850;background:radial-gradient(120% 90% at 50% -10%,#12315a 0%,#0a1a30 60%,#06101f 100%);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff}
 #verify.show{display:flex;animation:fadeIn .3s}
 .vf-inner{display:flex;flex-direction:column;align-items:center;gap:0;padding:0 30px;text-align:center}
-.vf-logo img{width:52px;height:52px;opacity:.9;margin-bottom:30px;animation:vfBreath 2.4s ease-in-out infinite}
+.vf-logo img{width:52px;height:52px;opacity:.9;margin-bottom:14px;animation:vfBreath 2.4s ease-in-out infinite}
 @keyframes vfBreath{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
+.vf-brand{font-size:1.5rem;font-weight:600;letter-spacing:9px;padding-left:9px;margin-bottom:34px;color:#fff}
 .vf-spinner{width:92px;height:92px;position:relative;margin-bottom:26px}
 .vf-spinner svg{width:100%;height:100%;transform:rotate(-90deg)}
 .vf-track{fill:none;stroke:rgba(255,255,255,.1);stroke-width:3}
@@ -561,6 +562,7 @@ svg{display:block}
   <div id="verify">
     <div class="vf-inner">
       <div class="vf-logo"><img src="icon.svg" alt="Avenue"/></div>
+      <div class="vf-brand">AVENUE</div>
       <div class="vf-spinner">
         <svg viewBox="0 0 50 50"><circle class="vf-track" cx="25" cy="25" r="21"/><circle class="vf-arc" cx="25" cy="25" r="21"/></svg>
         <div class="vf-shield"><svg viewBox="0 0 24 24" style="stroke:#22b587;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round"><use href="#i-shield"/></svg></div>
