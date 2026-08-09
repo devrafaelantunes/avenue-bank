@@ -229,7 +229,7 @@ svg{display:block}
 @keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 /* ══════ FACE ID ══════ */
-#faceid{position:fixed;inset:0;z-index:800;background:rgba(4,10,20,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:none;align-items:flex-end}
+#faceid{position:fixed;inset:0;z-index:1100;background:rgba(4,10,20,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:none;align-items:flex-end}
 #faceid.show{display:flex;animation:fadeIn .25s}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .face-sheet{background:linear-gradient(180deg,#0e2946,#0a1a30);width:100%;max-width:460px;margin:0 auto;border-radius:30px 30px 0 0;padding:32px 26px calc(env(safe-area-inset-bottom,0) + 30px);text-align:center;color:#fff;animation:sheetUp .38s cubic-bezier(.2,.8,.2,1)}
@@ -254,7 +254,7 @@ svg{display:block}
 .face-cancel{margin-top:16px;color:rgba(255,255,255,.5);font-size:.88rem;padding:8px}
 
 /* ══════ VERIFYING IDENTITY ══════ */
-#verify{position:fixed;inset:0;z-index:850;background:radial-gradient(120% 90% at 50% -10%,#12315a 0%,#0a1a30 60%,#06101f 100%);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+#verify{position:fixed;inset:0;z-index:1050;background:radial-gradient(120% 90% at 50% -10%,#12315a 0%,#0a1a30 60%,#06101f 100%);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff}
 #verify.show{display:flex;animation:fadeIn .3s}
 .vf-inner{display:flex;flex-direction:column;align-items:center;gap:0;padding:0 30px;text-align:center}
 .vf-logo img{width:52px;height:52px;opacity:.9;margin-bottom:14px;animation:vfBreath 2.4s ease-in-out infinite}
