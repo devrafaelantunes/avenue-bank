@@ -111,6 +111,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 }
 .bal-card::before{content:"";position:absolute;top:-40px;right:-30px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(62,230,168,.22),transparent 70%)}
 .bal-label{font-size:.72rem;color:rgba(255,255,255,.6);letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.cur-switch{margin-left:auto;display:flex;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:2px}
+.cs-btn{font-size:.64rem;font-weight:700;letter-spacing:.5px;color:rgba(255,255,255,.55);padding:4px 11px;border-radius:16px;transition:all .2s}
+.cs-btn.active{background:linear-gradient(135deg,var(--green2),var(--green));color:#04241a}
 .bal-eye{color:rgba(255,255,255,.55);font-size:.85rem}
 .bal-main{font-size:2.35rem;font-weight:700;margin-top:8px;letter-spacing:.5px;display:flex;align-items:baseline;gap:6px}
 .bal-cur{font-size:1.05rem;font-weight:600;color:rgba(255,255,255,.75)}
@@ -202,7 +205,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .info-row:last-child{border-bottom:none}
 .info-k{font-size:.8rem;color:var(--muted)}
 .info-v{font-size:.86rem;font-weight:600;color:var(--ink)}
+.info-v.copyable{cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.info-v .cpy{color:var(--green);font-size:.85rem;opacity:.7}
 .menu-card{background:var(--card);border-radius:18px;box-shadow:var(--sh2);margin:16px 20px 0;overflow:hidden}
+.xfer-tabs{display:flex;gap:8px;background:#eef2f7;padding:4px;border-radius:14px}
+.xfer-tab{flex:1;padding:10px 4px;font-size:.76rem;font-weight:700;color:var(--muted);border-radius:11px;transition:all .2s}
+.xfer-tab.active{background:#fff;color:var(--navy);box-shadow:var(--sh2)}
+.xfer-fee{font-size:.78rem;color:var(--muted);text-align:center;padding:4px}
+.xfer-fee b{color:var(--ink)}
 .menu-row{display:flex;align-items:center;gap:14px;padding:15px 16px;border-bottom:1px solid var(--line)}
 .menu-row:last-child{border-bottom:none}
 .menu-ico{width:36px;height:36px;border-radius:11px;background:#eef7f2;color:var(--greenDk);display:flex;align-items:center;justify-content:center;font-size:1rem}
@@ -311,7 +321,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2" stroke-linecap="round"/><path d="M9 10v1M15 10v1M9.5 15c.8.7 4.2.7 5 0" stroke-linecap="round"/></svg>
         Sign in with Face ID
       </button>
-      <div class="login-hint">Demo access — user <b>AMPC</b>, any password.</div>
+      <div class="login-hint">Demo access — user <b>AMPZ</b>, any password.</div>
     </div>
   </div>
 
@@ -334,10 +344,15 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 
       <div class="bal-wrap">
         <div class="bal-card">
-          <div class="bal-label">Available Balance <span class="bal-eye" onclick="toggleBal()" id="balEye">👁</span></div>
-          <div class="bal-main"><span id="balBRL">R$ 10,000.00</span></div>
+          <div class="bal-label">Available Balance <span class="bal-eye" onclick="toggleBal()" id="balEye">👁</span>
+            <div class="cur-switch">
+              <button class="cs-btn active" id="csBRL" onclick="setCur('BRL')">BRL</button>
+              <button class="cs-btn" id="csUSD" onclick="setCur('USD')">USD</button>
+            </div>
+          </div>
+          <div class="bal-main"><span id="balMain">R$ 10,000.00</span></div>
           <div class="bal-usd">
-            <span class="usd-val" id="balUSD">≈ US$ 1,958.10</span>
+            <span class="usd-val" id="balAlt">≈ US$ 1,958.10</span>
             <span class="fx-chip"><span class="fx-dot"></span>USD/BRL <b id="fxRate">5.1070</b></span>
           </div>
           <div class="bal-actions">
@@ -449,22 +464,45 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
     <!-- ───── TRANSFER ───── -->
     <div class="page" id="page-transfer">
       <div class="page-title">Send Money</div>
-      <div class="page-sub">Transfer to another account</div>
-      <div class="section" style="padding-top:14px">
+      <div class="page-sub">Choose how you want to send</div>
+      <div class="section" style="padding-top:12px">
+        <div class="xfer-tabs">
+          <button class="xfer-tab active" onclick="xferTab(this,'internal')">Internal</button>
+          <button class="xfer-tab" onclick="xferTab(this,'wire')">Domestic Wire</button>
+          <button class="xfer-tab" onclick="xferTab(this,'intl')">International</button>
+        </div>
+      </div>
+      <div class="section" style="padding-top:6px">
         <div class="info-card" style="margin:0;padding:18px 16px">
           <div class="fld" style="margin-bottom:16px">
-            <label style="color:var(--muted)">Recipient</label>
-            <input style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);width:100%;padding:13px;border-radius:12px;margin-top:6px" placeholder="Name, @tag or account"/>
+            <label style="color:var(--muted)">Recipient Name</label>
+            <input style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);width:100%;padding:13px;border-radius:12px;margin-top:6px" placeholder="Full name of beneficiary"/>
+          </div>
+          <div class="fld xfer-bank" style="margin-bottom:16px;display:none">
+            <label style="color:var(--muted)">Bank / SWIFT-BIC</label>
+            <input style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);width:100%;padding:13px;border-radius:12px;margin-top:6px" placeholder="e.g. CHASUS33 / AVNBUS33"/>
           </div>
           <div class="fld" style="margin-bottom:16px">
-            <label style="color:var(--muted)">Amount (US$)</label>
-            <input type="text" inputmode="decimal" style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);width:100%;padding:13px;border-radius:12px;margin-top:6px;font-size:1.2rem;font-weight:700" placeholder="0.00"/>
+            <label style="color:var(--muted)" id="acctLbl">Recipient @tag or account</label>
+            <input style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);width:100%;padding:13px;border-radius:12px;margin-top:6px" placeholder="Account number / IBAN"/>
+          </div>
+          <div class="fld" style="margin-bottom:16px">
+            <label style="color:var(--muted)">Amount</label>
+            <div style="display:flex;gap:8px;margin-top:6px">
+              <select id="xferCur" style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);padding:13px;border-radius:12px;font-weight:700">
+                <option>USD</option><option>BRL</option><option>EUR</option>
+              </select>
+              <input type="text" inputmode="decimal" style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);flex:1;padding:13px;border-radius:12px;font-size:1.2rem;font-weight:700" placeholder="0.00"/>
+            </div>
           </div>
           <div class="fld">
             <label style="color:var(--muted)">Note (optional)</label>
             <input style="background:#f4f6fa;border:1px solid var(--line);color:var(--ink);width:100%;padding:13px;border-radius:12px;margin-top:6px" placeholder="What's it for?"/>
           </div>
         </div>
+      </div>
+      <div class="section" style="padding-top:4px">
+        <div class="xfer-fee">Estimated fee <b id="xferFee">US$ 0.00</b> · Arrives <span id="xferEta">instantly</span></div>
       </div>
       <div class="section">
         <button class="btn-primary" style="color:#04241a" onclick="requireFace('Confirm Transfer', ()=>toast('Transfer sent'))">
@@ -485,12 +523,22 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
       <div style="height:14px"></div>
       <div class="info-card">
         <div class="info-row"><span class="info-k">Account Holder</span><span class="info-v">Rafael Antunes</span></div>
-        <div class="info-row"><span class="info-k">Username</span><span class="info-v">AMPC</span></div>
-        <div class="info-row"><span class="info-k">Account Number</span><span class="info-v">•••• •••• 8834</span></div>
+        <div class="info-row"><span class="info-k">Username</span><span class="info-v">AMPZ</span></div>
         <div class="info-row"><span class="info-k">Account Type</span><span class="info-v">Global Investment</span></div>
         <div class="info-row"><span class="info-k">Country</span><span class="info-v">United States 🇺🇸</span></div>
         <div class="info-row"><span class="info-k">Member Since</span><span class="info-v">Aug 2026</span></div>
         <div class="info-row"><span class="info-k">Status</span><span class="info-v" style="color:var(--greenDk)">● Verified</span></div>
+      </div>
+
+      <div class="sec-head" style="padding:22px 22px 12px 22px"><span class="sec-title">Banking Details</span><span class="sec-link" onclick="toast('Details copied')">Copy all</span></div>
+      <div class="info-card">
+        <div class="info-row" onclick="copyVal('Account number','204118348834')"><span class="info-k">Account Number</span><span class="info-v copyable">2041 1834 8834 <span class="cpy">⧉</span></span></div>
+        <div class="info-row" onclick="copyVal('Routing number','021000021')"><span class="info-k">Routing (ABA)</span><span class="info-v copyable">021000021 <span class="cpy">⧉</span></span></div>
+        <div class="info-row" onclick="copyVal('SWIFT','AVNBUS33XXX')"><span class="info-k">SWIFT / BIC</span><span class="info-v copyable">AVNBUS33XXX <span class="cpy">⧉</span></span></div>
+        <div class="info-row" onclick="copyVal('IBAN','US64AVNB0210000210204118348834')"><span class="info-k">IBAN</span><span class="info-v copyable" style="font-size:.74rem">US64 AVNB 0210 0002 1020 4118 3488 34 <span class="cpy">⧉</span></span></div>
+        <div class="info-row"><span class="info-k">Bank Name</span><span class="info-v">Avenue Financial Inc.</span></div>
+        <div class="info-row"><span class="info-k">Bank Address</span><span class="info-v" style="text-align:right;font-size:.78rem">375 Park Avenue<br/>New York, NY 10152</span></div>
+        <div class="info-row"><span class="info-k">Currency</span><span class="info-v">USD · BRL</span></div>
       </div>
       <div class="menu-card">
         <div class="menu-row" onclick="requireFace('Security Settings', ()=>toast('Security'))"><div class="menu-ico">🔒</div><div class="menu-t">Security & Face ID</div><div class="menu-ar">›</div></div>
@@ -585,6 +633,7 @@ const watch = [
 ];
 
 let balHidden = false;
+let mainCur = "BRL";
 
 /* ══════ FORMAT ══════ */
 const fmtBRL = n => "R$ " + n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -592,14 +641,25 @@ const fmtUSD = n => "US$ " + Math.abs(n).toLocaleString("en-US",{minimumFraction
 
 function renderBalance(){
   const usd = BAL_BRL / FX;
+  const mainEl = document.getElementById('balMain');
+  const altEl = document.getElementById('balAlt');
   if(balHidden){
-    document.getElementById('balBRL').textContent = "R$ ••••••";
-    document.getElementById('balUSD').textContent = "≈ US$ ••••";
+    mainEl.textContent = mainCur==="BRL" ? "R$ ••••••" : "US$ ••••";
+    altEl.textContent = mainCur==="BRL" ? "≈ US$ ••••" : "≈ R$ ••••";
+  } else if(mainCur==="BRL"){
+    mainEl.textContent = fmtBRL(BAL_BRL);
+    altEl.textContent = "≈ " + fmtUSD(usd);
   } else {
-    document.getElementById('balBRL').textContent = fmtBRL(BAL_BRL);
-    document.getElementById('balUSD').textContent = "≈ " + fmtUSD(usd);
+    mainEl.textContent = fmtUSD(usd);
+    altEl.textContent = "≈ " + fmtBRL(BAL_BRL);
   }
   document.getElementById('fxRate').textContent = FX.toFixed(4);
+}
+function setCur(c){
+  mainCur = c;
+  document.getElementById('csBRL').classList.toggle('active', c==="BRL");
+  document.getElementById('csUSD').classList.toggle('active', c==="USD");
+  renderBalance();
 }
 function toggleBal(){ balHidden=!balHidden; document.getElementById('balEye').textContent = balHidden?"🚫":"👁"; renderBalance(); }
 
@@ -649,13 +709,13 @@ function doLogin(){
   const u = document.getElementById('user').value.trim().toUpperCase();
   const p = document.getElementById('pass').value;
   const err = document.getElementById('loginErr');
-  if(u!=="AMPC"){ err.textContent="Unknown user. Use AMPC."; return; }
+  if(u!=="AMPZ"){ err.textContent="Unknown user. Use AMPZ."; return; }
   if(!p){ err.textContent="Please enter a password."; return; }
   err.textContent="";
   requireFace("Sign In", enterApp, "Authenticate to access your account");
 }
 function loginFace(){
-  document.getElementById('user').value = "AMPC";
+  document.getElementById('user').value = "AMPZ";
   requireFace("Sign In", enterApp, "Authenticate to access your account");
 }
 function enterApp(){
@@ -721,6 +781,21 @@ function toast(msg){
   document.getElementById('toastMsg').textContent=msg;
   const t=document.getElementById('toast'); t.classList.add('show');
   clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2000);
+}
+function copyVal(label,val){
+  try{ navigator.clipboard && navigator.clipboard.writeText(val); }catch(e){}
+  toast(label+" copied");
+}
+function xferTab(el,mode){
+  document.querySelectorAll('.xfer-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const bank=document.querySelector('.xfer-bank');
+  const acctLbl=document.getElementById('acctLbl');
+  const fee=document.getElementById('xferFee');
+  const eta=document.getElementById('xferEta');
+  if(mode==='internal'){ bank.style.display='none'; acctLbl.textContent='Recipient @tag or account'; fee.textContent='US$ 0.00'; eta.textContent='instantly'; }
+  else if(mode==='wire'){ bank.style.display='block'; acctLbl.textContent='Account & Routing number'; fee.textContent='US$ 15.00'; eta.textContent='same day'; }
+  else { bank.style.display='block'; acctLbl.textContent='IBAN'; fee.textContent='US$ 35.00'; eta.textContent='1-3 business days'; }
 }
 
 /* ══════ LIVE FX ══════ */
